@@ -40,8 +40,7 @@ function getEmitter() {
          * @returns {Object}
          */
         off: function (event, context) {
-            Object.keys(allEvents)
-                .filter(eventsName => eventsName.startsWith(event))
+            [event].concat(Object.keys(allEvents).filter(e => e.startsWith(event + '.')))
                 .forEach(filteredEvent => {
                     allEvents[filteredEvent] = allEvents[filteredEvent]
                         .filter(x => x.context !== context);
