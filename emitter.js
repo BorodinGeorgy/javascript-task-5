@@ -55,13 +55,14 @@ function getEmitter() {
          * @returns {Object}
          */
         emit: function (event) {
-            getAllEventsName(event).forEach(namesEvent => {
-                if (namesEvent in allEvents) {
-                    for (let ev of allEvents[namesEvent]) {
-                        ev.handler.call(ev.context);
-                    }
+            let parts = event.split('.');
+            while (parts.length) {
+                event = parts.join('.');
+                if (allEvents[event]) {
+                    allEvents[event].forEach(x => x.handler.call(x.context));
                 }
-            });
+                parts.pop();
+            }
 
             return this;
         },
@@ -83,8 +84,8 @@ function getEmitter() {
             this.on(event, context, function () {
                 if (eventCounter > 0) {
                     handler.call(context);
-                    eventCounter--;
                 }
+                eventCounter--;
             });
 
             return this;
@@ -104,10 +105,10 @@ function getEmitter() {
                 this.on(event, context, handler);
             }
 
-            let eventCounter = 1;
+            let eventCounter = 0;
 
             this.on(event, context, function () {
-                if (eventCounter % frequency === 1) {
+                if (eventCounter % frequency === 0) {
                     handler.call(context);
                 }
                 eventCounter++;
@@ -118,19 +119,3 @@ function getEmitter() {
     };
 }
 
-function getAllEventsName(event) {
-    let eventsName = '';
-
-    return event
-        .split('.')
-        .map(part => {
-            if (eventsName) {
-                eventsName += '.' + part;
-            } else {
-                eventsName = part;
-            }
-
-            return eventsName;
-        })
-        .reverse();
-}
