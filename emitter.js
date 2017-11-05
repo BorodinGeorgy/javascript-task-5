@@ -40,11 +40,11 @@ function getEmitter() {
          * @returns {Object}
          */
         off: function (event, context) {
-            [event].concat(Object.keys(allEvents).filter(e => e.startsWith(event + '.')))
+            Object.keys(allEvents)
+                .filter(e => (e + '.').split(event + '.').length > 1)
                 .filter(e => allEvents[e])
-                .forEach(filteredEvent => {
-                    allEvents[filteredEvent] = allEvents[filteredEvent]
-                        .filter(x => x.context !== context);
+                .forEach(function (e) {
+                    allEvents[e] = allEvents[e].filter(x => x.context !== context);
                 });
 
             return this;
@@ -81,12 +81,11 @@ function getEmitter() {
             if (times <= 0) {
                 this.on(event, context, handler);
             }
-            let eventCounter = times;
             this.on(event, context, function () {
-                if (eventCounter > 0) {
+                if (times > 0) {
                     handler.call(context);
                 }
-                eventCounter--;
+                times--;
             });
 
             return this;
